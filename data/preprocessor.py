@@ -13,5 +13,6 @@ def clean_data(df):
     merged_closes = merged_closes.dropna(axis=1)
     tics = merged_closes.columns
     df = df[df.tic.isin(tics)]
+    df = df.reset_index(drop=True)
     return df
 

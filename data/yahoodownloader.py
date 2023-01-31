@@ -3,25 +3,6 @@ import yfinance as yf
 
 
 class YahooDownloader:
-    """Provides methods for retrieving daily stock data from
-    Yahoo Finance API
-
-    Attributes
-    ----------
-        start_date : str
-            start date of the data (modified from neofinrl_config.py)
-        end_date : str
-            end date of the data (modified from neofinrl_config.py)
-        ticker_list : list
-            a list of stock tickers (modified from neofinrl_config.py)
-
-    Methods
-    -------
-    fetch_data()
-        Fetches data from yahoo API
-
-    """
-
     def __init__(self, start_date: str, end_date: str, ticker_list: list):
 
         self.start_date = start_date
@@ -44,6 +25,8 @@ class YahooDownloader:
             data_df = pd.concat([data_df, temp_df])
         # reset the index, we want to use numbers as index instead of dates
         data_df = data_df.reset_index()
+        print(len(data_df))
+        print(data_df)
         # convert the column names to standardized names
         data_df.columns = [
             "date",
@@ -69,16 +52,15 @@ class YahooDownloader:
         data_df = data_df.reset_index(drop=True)
         # sort by date and tic
         data_df = data_df.sort_values(by=["date", "tic"]).reset_index(drop=True)
-        print("Shape of DataFrame: ", data_df.shape)
         return data_df
 
-    def select_equal_rows_stock(self, df):
-        df_check = df.tic.value_counts()
-        df_check = pd.DataFrame(df_check).reset_index()
-        df_check.columns = ["tic", "counts"]
-        mean_df = df_check.counts.mean()
-        equal_list = list(df.tic.value_counts() >= mean_df)
-        names = df.tic.value_counts().index
-        select_stocks_list = list(names[equal_list])
-        df = df[df.tic.isin(select_stocks_list)]
-        return df
+    # def select_equal_rows_stock(self, df):
+    #     df_check = df.tic.value_counts()
+    #     df_check = pd.DataFrame(df_check).reset_index()
+    #     df_check.columns = ["tic", "counts"]
+    #     mean_df = df_check.counts.mean()
+    #     equal_list = list(df.tic.value_counts() >= mean_df)
+    #     names = df.tic.value_counts().index
+    #     select_stocks_list = list(names[equal_list])
+    #     df = df[df.tic.isin(select_stocks_list)]
+    #     return df

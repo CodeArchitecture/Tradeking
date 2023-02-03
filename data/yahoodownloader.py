@@ -25,8 +25,6 @@ class YahooDownloader:
             data_df = pd.concat([data_df, temp_df])
         # reset the index, we want to use numbers as index instead of dates
         data_df = data_df.reset_index()
-        print(len(data_df))
-        print(data_df)
         # convert the column names to standardized names
         data_df.columns = [
             "date",
@@ -43,7 +41,7 @@ class YahooDownloader:
         # drop the adjusted close price column
         data_df = data_df.drop(labels="adjcp", axis=1)
         # create day of the week column (monday = 0,Tuesday = 1...)
-        data_df["day"] = data_df["date"].dt.dayofweek
+        # data_df["day"] = data_df["date"].dt.dayofweek
         # convert date to standard string format, easy to filter
         # seems useless in this case
         data_df["date"] = data_df.date.apply(lambda x: x.strftime("%Y-%m-%d"))
@@ -53,14 +51,3 @@ class YahooDownloader:
         # sort by date and tic
         data_df = data_df.sort_values(by=["date", "tic"]).reset_index(drop=True)
         return data_df
-
-    # def select_equal_rows_stock(self, df):
-    #     df_check = df.tic.value_counts()
-    #     df_check = pd.DataFrame(df_check).reset_index()
-    #     df_check.columns = ["tic", "counts"]
-    #     mean_df = df_check.counts.mean()
-    #     equal_list = list(df.tic.value_counts() >= mean_df)
-    #     names = df.tic.value_counts().index
-    #     select_stocks_list = list(names[equal_list])
-    #     df = df[df.tic.isin(select_stocks_list)]
-    #     return df

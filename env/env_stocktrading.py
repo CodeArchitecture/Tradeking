@@ -253,6 +253,7 @@ class StockTradingEnv(gym.Env):
             df_rewards.columns = ["account_rewards"]
             df_rewards["date"] = self.date_memory[:-1]
             if self.episode % self.print_verbosity == 0:
+                print("=================================")
                 print(f"day: {self.day}, episode: {self.episode}")
                 print(f"begin_total_asset: {self.asset_memory[0]:0.2f}")
                 print(f"end_total_asset: {end_total_asset:0.2f}")
@@ -301,7 +302,7 @@ class StockTradingEnv(gym.Env):
             return self.state, self.reward, self.terminal, {}
 
         else:
-            actions = actions * self.hmax  # actions initially is scaled between 0 to 1
+            actions = actions * self.hmax  # actions initially is scaled between -1 to 1
             actions = actions.astype(int)  # convert into integer because we can't by fraction of shares
             if self.turbulence_threshold is not None:
                 if self.turbulence >= self.turbulence_threshold:

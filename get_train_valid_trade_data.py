@@ -48,4 +48,4 @@ def get_train_valid_trade_data(
     len(valid.tic.unique()) * len(valid.date.unique()) == len(valid) and \
     len(trade.tic.unique())*len(trade.date.unique()) == len(trade)
 
-    return train, valid, trade
+    return df, train, valid, trade

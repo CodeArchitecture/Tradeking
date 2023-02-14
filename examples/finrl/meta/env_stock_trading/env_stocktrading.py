@@ -302,9 +302,7 @@ class StockTradingEnv(gym.Env):
 
         else:
             actions = actions * self.hmax  # actions initially is scaled between 0 to 1
-            actions = actions.astype(
-                int
-            )  # convert into integer because we can't by fraction of shares
+            actions = actions.astype(int)  # convert into integer because we can't by fraction of shares
             if self.turbulence_threshold is not None:
                 if self.turbulence >= self.turbulence_threshold:
                     actions = np.array([-self.hmax] * self.stock_dim)

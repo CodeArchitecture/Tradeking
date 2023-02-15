@@ -18,7 +18,8 @@ def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
 
     # trade = data_split(df,TRADE_START_DATE,TRADE_END_DATE)
 
-    for day in range(0, trade_end_day-window_size-1, window_size):
+    for day in range(0, trade_end_day-train_len-window_size-1, window_size):
+        # train phase
         train = df.loc[day:day+train_len]
         train.index = train['date'].factorize()[0]
 
@@ -27,7 +28,7 @@ def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
         model_a2c, model_ppo, model_ddpg = run_train(e_train_gym,TOTAL_TIMESTEPS)
 
         models={'a2c':model_a2c,'ppo':model_ppo,'ddpg':model_ddpg}
-
+        # trade phase
         trade = df.loc[day+train_len:day+train_len+window_size]
         trade.index = trade['date'].factorize()[0]
 
@@ -65,7 +66,6 @@ def run_trade(e_trade_gym, models, model_name):
         action, _states = model.predict(obs)
         # print(action)
         obs, reward, dones, info = e_trade_gym.step(action)
-        rewards.append(reward)
+        rewards.append(float(reward))
 
-    rewards = np.array(rewards)
     return rewards

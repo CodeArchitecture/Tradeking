@@ -97,7 +97,7 @@ class StockTradingEnv(gym.Env):
         self.date_memory = [self._get_date()]
         #         self.logger = Logger('results',[CSVOutputFormat])
         # self.reset()
-        self._seed()
+        # self._seed()
 
     def _sell_stock(self, index, action):
         def _do_sell_normal():
@@ -220,9 +220,6 @@ class StockTradingEnv(gym.Env):
     def step(self, actions):
         self.terminal = self.day >= len(self.df.index.unique()) - 1
         if self.terminal:
-            # print(f"Episode: {self.episode}")
-            if self.make_plots:
-                self._make_plot()
             end_total_asset = self.state[0] + sum(
                 np.array(self.state[1 : (self.stock_dim + 1)])
                 * np.array(self.state[(self.stock_dim + 1) : (self.stock_dim * 2 + 1)])
@@ -263,43 +260,8 @@ class StockTradingEnv(gym.Env):
                 if df_total_value["daily_return"].std() != 0:
                     print(f"Sharpe: {sharpe:0.3f}")
                 print("=================================")
-
-            if (self.model_name != "") and (self.mode != ""):
-                df_actions = self.save_action_memory()
-                df_actions.to_csv(
-                    "results/actions_{}_{}_{}.csv".format(
-                        self.mode, self.model_name, self.iteration
-                    )
-                )
-                df_total_value.to_csv(
-                    "results/account_value_{}_{}_{}.csv".format(
-                        self.mode, self.model_name, self.iteration
-                    ),
-                    index=False,
-                )
-                df_rewards.to_csv(
-                    "results/account_rewards_{}_{}_{}.csv".format(
-                        self.mode, self.model_name, self.iteration
-                    ),
-                    index=False,
-                )
-                plt.plot(self.asset_memory, "r")
-                plt.savefig(
-                    "results/account_value_{}_{}_{}.png".format(
-                        self.mode, self.model_name, self.iteration
-                    ),
-                    index=False,
-                )
-                plt.close()
-
-            # Add outputs to logger interface
-            # logger.record("environment/portfolio_value", end_total_asset)
-            # logger.record("environment/total_reward", tot_reward)
-            # logger.record("environment/total_reward_pct", (tot_reward / (end_total_asset - tot_reward)) * 100)
-            # logger.record("environment/total_cost", self.cost)
-            # logger.record("environment/total_trades", self.trades)
             
-            return self.state, self.reward, self.terminal, {}
+            # return self.state, self.reward, self.terminal, {}
 
         else:
             actions = actions * self.hmax  # actions initially is scaled between -1 to 1
@@ -348,14 +310,14 @@ class StockTradingEnv(gym.Env):
             )
             self.asset_memory.append(end_total_asset)
             self.date_memory.append(self._get_date())
-            self.reward = end_total_asset - begin_total_asset
+            self.reward = float((end_total_asset - begin_total_asset)/begin_total_asset)
             self.rewards_memory.append(self.reward)
-            self.reward = self.reward * self.reward_scaling
+            # self.reward = self.reward * self.reward_scaling
             self.state_memory.append(
                 self.state
             )  # add current state in state_recorder for each step
-
-        return self.state, self.reward, self.terminal, {}
+        # print('*'*10, self.reward)
+        return self.state, float(self.reward), self.terminal, {}
 
     def reset(self):
         # initiate state
@@ -487,66 +449,66 @@ class StockTradingEnv(gym.Env):
         return date
 
     # add save_state_memory to preserve state in the trading process
-    def save_state_memory(self):
-        if len(self.df.tic.unique()) > 1:
-            # date and close price length must match actions length
-            date_list = self.date_memory[:-1]
-            df_date = pd.DataFrame(date_list)
-            df_date.columns = ["date"]
+    # def save_state_memory(self):
+    #     if len(self.df.tic.unique()) > 1:
+    #         # date and close price length must match actions length
+    #         date_list = self.date_memory[:-1]
+    #         df_date = pd.DataFrame(date_list)
+    #         df_date.columns = ["date"]
 
-            state_list = self.state_memory
-            df_states = pd.DataFrame(
-                state_list,
-                columns=[
-                    "cash",
-                    "Bitcoin_price",
-                    "Gold_price",
-                    "Bitcoin_num",
-                    "Gold_num",
-                    "Bitcoin_Disable",
-                    "Gold_Disable",
-                ],
-            )
-            df_states.index = df_date.date
-            # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
-        else:
-            date_list = self.date_memory[:-1]
-            state_list = self.state_memory
-            df_states = pd.DataFrame({"date": date_list, "states": state_list})
-        # print(df_states)
-        return df_states
+    #         state_list = self.state_memory
+    #         df_states = pd.DataFrame(
+    #             state_list,
+    #             columns=[
+    #                 "cash",
+    #                 "Bitcoin_price",
+    #                 "Gold_price",
+    #                 "Bitcoin_num",
+    #                 "Gold_num",
+    #                 "Bitcoin_Disable",
+    #                 "Gold_Disable",
+    #             ],
+    #         )
+    #         df_states.index = df_date.date
+    #         # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
+    #     else:
+    #         date_list = self.date_memory[:-1]
+    #         state_list = self.state_memory
+    #         df_states = pd.DataFrame({"date": date_list, "states": state_list})
+    #     # print(df_states)
+    #     return df_states
 
-    def save_asset_memory(self):
-        date_list = self.date_memory
-        asset_list = self.asset_memory
-        # print(len(date_list))
-        # print(len(asset_list))
-        df_account_value = pd.DataFrame(
-            {"date": date_list, "account_value": asset_list}
-        )
-        return df_account_value
+    # def save_asset_memory(self):
+    #     date_list = self.date_memory
+    #     asset_list = self.asset_memory
+    #     # print(len(date_list))
+    #     # print(len(asset_list))
+    #     df_account_value = pd.DataFrame(
+    #         {"date": date_list, "account_value": asset_list}
+    #     )
+    #     return df_account_value
 
-    def save_action_memory(self):
-        if len(self.df.tic.unique()) > 1:
-            # date and close price length must match actions length
-            date_list = self.date_memory[:-1]
-            df_date = pd.DataFrame(date_list)
-            df_date.columns = ["date"]
+    # def save_action_memory(self):
+    #     if len(self.df.tic.unique()) > 1:
+    #         # date and close price length must match actions length
+    #         date_list = self.date_memory[:-1]
+    #         df_date = pd.DataFrame(date_list)
+    #         df_date.columns = ["date"]
 
-            action_list = self.actions_memory
-            df_actions = pd.DataFrame(action_list)
-            df_actions.columns = self.data.tic.values
-            df_actions.index = df_date.date
-            # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
-        else:
-            date_list = self.date_memory[:-1]
-            action_list = self.actions_memory
-            df_actions = pd.DataFrame({"date": date_list, "actions": action_list})
-        return df_actions
+    #         action_list = self.actions_memory
+    #         df_actions = pd.DataFrame(action_list)
+    #         df_actions.columns = self.data.tic.values
+    #         df_actions.index = df_date.date
+    #         # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
+    #     else:
+    #         date_list = self.date_memory[:-1]
+    #         action_list = self.actions_memory
+    #         df_actions = pd.DataFrame({"date": date_list, "actions": action_list})
+    #     return df_actions
 
-    def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
+    # def _seed(self, seed=None):
+    #     self.np_random, seed = seeding.np_random(seed)
+    #     return [seed]
 
     def get_sb_env(self):
         e = DummyVecEnv([lambda: self])

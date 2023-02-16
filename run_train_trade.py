@@ -18,7 +18,7 @@ def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
 
     # trade = data_split(df,TRADE_START_DATE,TRADE_END_DATE)
 
-    for day in range(0, trade_end_day-train_len-window_size-1, window_size):
+    for day in range(0, trade_end_day-train_len-window_size, window_size):
         # train phase
         train = df.loc[day:day+train_len]
         train.index = train['date'].factorize()[0]
@@ -29,7 +29,7 @@ def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
 
         models={'a2c':model_a2c,'ppo':model_ppo,'ddpg':model_ddpg}
         # trade phase
-        trade = df.loc[day+train_len:day+train_len+window_size]
+        trade = df.loc[day+train_len+1:day+train_len+window_size]
         trade.index = trade['date'].factorize()[0]
 
         e_trade_gym = StockTradingEnv(df = trade, **env_kwargs).get_sb_env()

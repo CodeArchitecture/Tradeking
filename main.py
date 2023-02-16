@@ -12,7 +12,7 @@ state_space = 1 + 2*stock_dimension + len(tech_list)*stock_dimension
 print(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
 
 stock_dim = len(train.tic.unique())
-from env.env_stocktrading import StockTradingEnv
+from env.PM.env_stocktrading import StockTradingEnv
 env_kwargs = {
     "stock_dim": stock_dimension, 
     "hmax": 100, 
@@ -38,5 +38,5 @@ e_train_gym = e_train_gym.get_sb_env()
 # main
 from run_train_trade import run_train_trade
 
-TOTAL_TIMESTEPS = [25000,25000,2500]
+TOTAL_TIMESTEPS = [10000,10000,2000]
 run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size = 63)

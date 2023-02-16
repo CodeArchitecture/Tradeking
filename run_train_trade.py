@@ -1,4 +1,4 @@
-from env.env_stocktrading import StockTradingEnv
+from env.PM.env_stocktrading import StockTradingEnv
 from stable_baselines3 import A2C
 from stable_baselines3 import PPO
 from stable_baselines3 import DDPG
@@ -15,14 +15,14 @@ def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
     trade_end_day = df.index[-1]
     day = 0 # current day
     train_len = train_end_day-day
-
+    # print('trade_end_day',trade_end_day)
+    # print('train_len',train_len)
     # trade = data_split(df,TRADE_START_DATE,TRADE_END_DATE)
 
     for day in range(0, trade_end_day-train_len-window_size, window_size):
         # train phase
         train = df.loc[day:day+train_len]
         train.index = train['date'].factorize()[0]
-
         e_train_gym = StockTradingEnv(df=train, **env_kwargs).get_sb_env()
 
         model_a2c, model_ppo, model_ddpg = run_train(e_train_gym,TOTAL_TIMESTEPS)
@@ -31,10 +31,10 @@ def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
         # trade phase
         trade = df.loc[day+train_len+1:day+train_len+window_size]
         trade.index = trade['date'].factorize()[0]
-
-        e_trade_gym = StockTradingEnv(df = trade, **env_kwargs).get_sb_env()
+        # print(trade)
 
         for model_name in ['a2c','ppo','ddpg']:
+            e_trade_gym = StockTradingEnv(df = trade, **env_kwargs).get_sb_env()
             rewards = run_trade(e_trade_gym, models, model_name)
             pd.Series(rewards).to_csv('results/asset_value_{}_{}.csv'.format(model_name,day))
 
@@ -64,7 +64,8 @@ def run_trade(e_trade_gym, models, model_name):
     obs = e_trade_gym.reset()
     while not dones:
         action, _states = model.predict(obs)
-        # print(action)
+        # print(_states)
+        print(action)
         obs, reward, dones, info = e_trade_gym.step(action)
         rewards.append(float(reward))
 

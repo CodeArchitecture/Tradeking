@@ -1,4 +1,9 @@
 import pandas as pd
+import os
+if not os.path.exists('results'):
+    os.mkdir('results')
+
+
 
 df = pd.read_csv('data/df.csv',index_col=0)
 train = pd.read_csv('data/train.csv',index_col=0)

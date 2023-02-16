@@ -11,13 +11,10 @@ import numpy as np
 def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
     train = data_split(df,TRAIN_START_DATE,TRAIN_END_DATE)
     train_end_day = train.index[-1]
-    # trade_start_day = train_end_day+1
     trade_end_day = df.index[-1]
     day = 0 # current day
     train_len = train_end_day-day
-    # print('trade_end_day',trade_end_day)
-    # print('train_len',train_len)
-    # trade = data_split(df,TRADE_START_DATE,TRADE_END_DATE)
+
 
     for day in range(0, trade_end_day-train_len-window_size, window_size):
         # train phase

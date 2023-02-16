@@ -43,5 +43,5 @@ e_train_gym = e_train_gym.get_sb_env()
 # main
 from run_train_trade import run_train_trade
 
-TOTAL_TIMESTEPS = [10000,10000,2000]
+TOTAL_TIMESTEPS = [25000,25000,5000]
 run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size = 63)

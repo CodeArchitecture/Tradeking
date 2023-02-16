@@ -65,7 +65,7 @@ def run_trade(e_trade_gym, models, model_name):
     while not dones:
         action, _states = model.predict(obs)
         # print(_states)
-        print(action)
+        # print(action)
         obs, reward, dones, info = e_trade_gym.step(action)
         rewards.append(float(reward))
 

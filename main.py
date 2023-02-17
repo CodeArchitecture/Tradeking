@@ -1,8 +1,16 @@
+import argparse
+# parser = argparse.ArgumentParser()
+
+# parser.add_argument("--window_size",
+#                     type=int,
+#                     default=63,
+#                     help="window size for train trade")
+# args = parser.parse_args(args=[])
+
 import pandas as pd
 import os
 if not os.path.exists('results'):
     os.mkdir('results')
-
 
 
 df = pd.read_csv('data/df.csv',index_col=0)
@@ -43,5 +51,5 @@ e_train_gym = e_train_gym.get_sb_env()
 # main
 from run_train_trade import run_train_trade
 
-TOTAL_TIMESTEPS = [25000,25000,5000]
-run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size = 63)
+TOTAL_TIMESTEPS = [10000,10000,2000]
+run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size=21)

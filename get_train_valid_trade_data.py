@@ -1,4 +1,3 @@
-import config.config_tickers as config_tickers
 from data.yahoodownloader import YahooDownloader
 import os
 import warnings
@@ -16,8 +15,8 @@ def get_train_valid_trade_data(
         VALID_START_DATE,
         VALID_END_DATE,
         TRADE_START_DATE,
-        TRADE_END_DATE
-):
+        TRADE_END_DATE,
+        tickers):
     L=100
     from datetime import timedelta 
     from datetime import datetime
@@ -28,7 +27,7 @@ def get_train_valid_trade_data(
 
     df = YahooDownloader(start_date=date,
                          end_date=TRADE_END_DATE,
-                         ticker_list=config_tickers.DOW_30_TICKER).fetch_data()
+                         ticker_list=tickers).fetch_data()
 
     from data.preprocessor import FeatureEngineer, data_split
     from config.config import INDICATORS
@@ -38,6 +37,8 @@ def get_train_valid_trade_data(
     df = fe.clean_data(df)
     df = fe.add_technical_indicator(df)
     df = df.fillna(0)
+    # df = fe.add_turbulence(df)
+    # df = df.fillna(0)
 
     df = df[feature_list]
     

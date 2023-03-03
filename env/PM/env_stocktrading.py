@@ -102,8 +102,8 @@ class StockTradingEnv(gym.Env):
     def _sell_stock(self, index, action):
         def _do_sell_normal():
             if (
-                self.state[index + 2 * self.stock_dim + 1] != True
-            ):  # check if the stock is able to sell, for simlicity we just add it in techical index
+                self.state[index + 1] > 0
+            ):  # check if the stock is able to sell, for simlicity we just add it in technical index
                 # if self.state[index + 1] > 0: # if we use price<0 to denote a stock is unable to trade in that day, the total asset calculation may be wrong for the price is unreasonable
                 # Sell only if the price is > 0 (no missing data in this particular date)
                 # perform sell action based on the sign of the action
@@ -212,10 +212,10 @@ class StockTradingEnv(gym.Env):
 
         return buy_num_shares
 
-    def _make_plot(self):
-        plt.plot(self.asset_memory, "r")
-        plt.savefig(f"results/account_value_trade_{self.episode}.png")
-        plt.close()
+    # def _make_plot(self):
+    #     plt.plot(self.asset_memory, "r")
+    #     plt.savefig(f"results/account_value_trade_{self.episode}.png")
+    #     plt.close()
 
     def step(self, actions):
         self.terminal = self.day >= len(self.df.index.unique()) - 1
@@ -311,6 +311,7 @@ class StockTradingEnv(gym.Env):
             self.asset_memory.append(end_total_asset)
             self.date_memory.append(self._get_date())
             self.reward = float((end_total_asset - begin_total_asset)/begin_total_asset)
+            # self.reward = float(end_total_asset - begin_total_asset)
             self.rewards_memory.append(self.reward)
             # self.reward = self.reward * self.reward_scaling
             self.state_memory.append(
@@ -448,6 +449,10 @@ class StockTradingEnv(gym.Env):
             date = self.data.date
         return date
 
+    def get_sb_env(self):
+        e = DummyVecEnv([lambda: self])
+        obs = e.reset()
+        return e
     # add save_state_memory to preserve state in the trading process
     # def save_state_memory(self):
     #     if len(self.df.tic.unique()) > 1:
@@ -510,7 +515,4 @@ class StockTradingEnv(gym.Env):
     #     self.np_random, seed = seeding.np_random(seed)
     #     return [seed]
 
-    def get_sb_env(self):
-        e = DummyVecEnv([lambda: self])
-        obs = e.reset()
-        return e
+    

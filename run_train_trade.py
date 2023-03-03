@@ -8,32 +8,46 @@ from data.preprocessor import data_split
 import pandas as pd
 import numpy as np
 
-def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size):
-    train = data_split(df,TRAIN_START_DATE,TRAIN_END_DATE)
-    train_end_day = train.index[-1]
-    trade_end_day = df.index[-1]
-    day = 0 # current day
-    train_len = train_end_day-day
+def run_train_trade(df, env_kwargs, TOTAL_TIMESTEPS, window_size=None):
+    if window_size!=None:
+        train = data_split(df,TRAIN_START_DATE,TRAIN_END_DATE)
+        train_end_day = train.index[-1]
+        trade_end_day = df.index[-1]
+        day = 0 # current day
+        train_len = train_end_day-day
+        for day in range(0, trade_end_day-train_len-window_size, window_size):
+            # train phase
+            train = df.loc[day:day+train_len]
+            train.index = train['date'].factorize()[0]
+            e_train_gym = StockTradingEnv(df=train, **env_kwargs).get_sb_env()
 
+            model_a2c, model_ppo, model_ddpg = run_train(e_train_gym,TOTAL_TIMESTEPS)
 
-    for day in range(0, trade_end_day-train_len-window_size, window_size):
-        # train phase
-        train = df.loc[day:day+train_len]
+            models={'a2c':model_a2c,'ppo':model_ppo,'ddpg':model_ddpg}
+            # trade phase
+            trade = df.loc[day+train_len+1:day+train_len+window_size]
+            trade.index = trade['date'].factorize()[0]
+            # print(trade)
+
+            for model_name in ['a2c','ppo','ddpg']:
+                e_trade_gym = StockTradingEnv(df = trade, **env_kwargs).get_sb_env()
+                rewards = run_trade(e_trade_gym, models, model_name)
+                pd.Series(rewards).to_csv('results/asset_value_{}_{}.csv'.format(model_name,day))
+    else :
+        train = data_split(df,TRAIN_START_DATE,TRAIN_END_DATE)
+        trade = data_split(df,TRADE_START_DATE,TRADE_END_DATE)
         train.index = train['date'].factorize()[0]
         e_train_gym = StockTradingEnv(df=train, **env_kwargs).get_sb_env()
-
         model_a2c, model_ppo, model_ddpg = run_train(e_train_gym,TOTAL_TIMESTEPS)
 
         models={'a2c':model_a2c,'ppo':model_ppo,'ddpg':model_ddpg}
         # trade phase
-        trade = df.loc[day+train_len+1:day+train_len+window_size]
         trade.index = trade['date'].factorize()[0]
-        # print(trade)
 
         for model_name in ['a2c','ppo','ddpg']:
             e_trade_gym = StockTradingEnv(df = trade, **env_kwargs).get_sb_env()
             rewards = run_trade(e_trade_gym, models, model_name)
-            pd.Series(rewards).to_csv('results/asset_value_{}_{}.csv'.format(model_name,day))
+            pd.Series(rewards).to_csv('results/asset_value_{}.csv'.format(model_name))
 
     return None
 
